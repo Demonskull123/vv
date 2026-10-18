@@ -1,33 +1,35 @@
-local function DzGuard(fn)
+-- ============================================================
+-- TEMPO HUB — VV Ultimatum
+-- All features. Native TeekUI controls only.
+-- ============================================================
+
+local function TempoGuard(fn)
     local ok, err = xpcall(fn, function(e)
         return tostring(e) .. "\n" .. debug.traceback(nil, 2)
     end)
     if ok then return end
 
     local full = tostring(err or "unknown error")
-    warn("[DZ HUB] " .. full)
+    warn("[TEMPO] " .. full)
 
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "DZ HUB - script error",
+            Title = "TEMPO - script error",
             Text = full:match("^[^\n]*") or full,
             Duration = 10,
         })
     end)
 end
 
-DzGuard(function()
+TempoGuard(function()
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 1. BOOT                                                                ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
-local _dzEnv = (getgenv and getgenv()) or _G
+local _tempo = (getgenv and getgenv()) or _G
 
-if _dzEnv._VVUUnload then pcall(_dzEnv._VVUUnload); _dzEnv._VVUUnload = nil end
+if _tempo._TempoUnload then pcall(_tempo._TempoUnload); _tempo._TempoUnload = nil end
 pcall(function()
     local RS0 = game:GetService("RunService")
-    for _, n in ipairs({ "VVUFly", "VVUSpeed", "VVUTween", "VVUMobTween", "VVUChestTween", "VVUServerESP" }) do
+    for _, n in ipairs({ "TempoFly", "TempoSpeed", "TempoTween", "TempoMobTween", "TempoChestTween", "TempoServerESP" }) do
         RS0:UnbindFromRenderStep(n)
     end
 end)
@@ -35,9 +37,6 @@ end)
 repeat task.wait() until game:IsLoaded()
 task.wait(3)
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 2. SERVICES                                                            ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -57,9 +56,6 @@ local HS  = HttpService
 local TP  = TeleportService
 local Cam = workspace.CurrentCamera
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 3. PLAYER                                                              ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 local LP = Players.LocalPlayer
 
@@ -75,9 +71,6 @@ bind(LP.Idled, function()
     VirtualUser:ClickButton2(Vector2.new())
 end)
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 4. NETWORK                                                             ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 ReplicatedStorage:WaitForChild("Requests", 30)
 
@@ -86,7 +79,7 @@ local GuardOk, GuardWhy = false, "not attempted"
 do
     local ok, err = pcall(function()
         if type(hookfunction) ~= "function" then
-            error("executor sem hookfunction", 0)
+            error("executor missing hookfunction", 0)
         end
         NetworkManager = require(ReplicatedStorage.SharedModules.NetworkManager)
 
@@ -101,12 +94,12 @@ do
     end)
     if not ok then
         GuardWhy = tostring(err)
-        warn("[DZ HUB] the game tripwire was NOT muted: " .. GuardWhy)
+        warn("[TEMPO] tripwire not muted: " .. GuardWhy)
     end
 end
 
 local function fire(remote, ...)
-    local safe = _dzEnv.DzSafe
+    local safe = _tempo.DzSafe
     if safe and type(safe.Fire) == "function" then
         return safe.Fire(remote, ...)
     end
@@ -133,9 +126,6 @@ local function _getRemote(name)
     return req and req:FindFirstChild(name)
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 5. HELPERS                                                             ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 local S = {
     speed = 100, infJumpH = 50, flySpeed = 100, tweenSpeed = 100,
@@ -148,7 +138,6 @@ local S = {
 }
 _wFPS = 60
 
--- Opt/Tog created in TempoUI bootstrap
 
 local function launchTP(placeId, jobId)
     local ok = pcall(function()
@@ -178,17 +167,17 @@ do
             if (to - from).Magnitude < 1 then return true end
             if _toggleFlight then pcall(function() _toggleFlight:FireServer(true) end) end
             local done = false; local success = false; local tweenFrame = CFrame.new(from)
-            RS:BindToRenderStep("VVUTween", Enum.RenderPriority.Input.Value, function(dt)
-                if _tweenVersion ~= myVersion then RS:UnbindFromRenderStep("VVUTween"); done = true; return end
-                if _cancelTween then _cancelTween = false; releaseW(); RS:UnbindFromRenderStep("VVUTween"); done = true; return end
-                if cancelCheck and cancelCheck() then releaseW(); RS:UnbindFromRenderStep("VVUTween"); done = true; return end
-                local c = getChar(); if not c then RS:UnbindFromRenderStep("VVUTween"); done = true; return end
-                local h = c:FindFirstChild("HumanoidRootPart"); if not h then RS:UnbindFromRenderStep("VVUTween"); done = true; return end
+            RS:BindToRenderStep("TempoTween", Enum.RenderPriority.Input.Value, function(dt)
+                if _tweenVersion ~= myVersion then RS:UnbindFromRenderStep("TempoTween"); done = true; return end
+                if _cancelTween then _cancelTween = false; releaseW(); RS:UnbindFromRenderStep("TempoTween"); done = true; return end
+                if cancelCheck and cancelCheck() then releaseW(); RS:UnbindFromRenderStep("TempoTween"); done = true; return end
+                local c = getChar(); if not c then RS:UnbindFromRenderStep("TempoTween"); done = true; return end
+                local h = c:FindFirstChild("HumanoidRootPart"); if not h then RS:UnbindFromRenderStep("TempoTween"); done = true; return end
                 local mv = to - tweenFrame.Position
                 if mv.Magnitude <= 1 then
                     h.AssemblyLinearVelocity = Vector3.zero
                     h.CFrame = CFrame.new(to, to + (to - from).Unit)
-                    success = true; RS:UnbindFromRenderStep("VVUTween"); done = true; return
+                    success = true; RS:UnbindFromRenderStep("TempoTween"); done = true; return
                 end
                 tweenFrame = tweenFrame + mv.Unit * S.tweenSpeed * dt
                 local hDir = Vector3.new(mv.X, 0, mv.Z)
@@ -219,11 +208,11 @@ do
         _chestTweenVersion = _chestTweenVersion + 1
         local myVersion = _chestTweenVersion
         local target = cf.Position; local tweenFrame = CFrame.new(hrp.Position); local done = false
-        RS:BindToRenderStep("VVUChestTween", Enum.RenderPriority.Input.Value - 1, function(dt)
-            if _chestTweenVersion ~= myVersion or (cancelCheck and cancelCheck()) then RS:UnbindFromRenderStep("VVUChestTween"); done = true; return end
-            local h = getHRP(); if not h then RS:UnbindFromRenderStep("VVUChestTween"); done = true; return end
+        RS:BindToRenderStep("TempoChestTween", Enum.RenderPriority.Input.Value - 1, function(dt)
+            if _chestTweenVersion ~= myVersion or (cancelCheck and cancelCheck()) then RS:UnbindFromRenderStep("TempoChestTween"); done = true; return end
+            local h = getHRP(); if not h then RS:UnbindFromRenderStep("TempoChestTween"); done = true; return end
             local mv = target - tweenFrame.Position
-            if mv.Magnitude <= 1 then h.CFrame = cf; RS:UnbindFromRenderStep("VVUChestTween"); done = true; return end
+            if mv.Magnitude <= 1 then h.CFrame = cf; RS:UnbindFromRenderStep("TempoChestTween"); done = true; return end
             tweenFrame = tweenFrame + mv.Unit * S.tweenSpeed * dt
             h.AssemblyLinearVelocity = Vector3.zero; h.CFrame = CFrame.new(tweenFrame.Position)
         end)
@@ -237,11 +226,11 @@ do
         _mobTweenVersion = _mobTweenVersion + 1
         local myVersion = _mobTweenVersion
         local target = cf.Position; local tweenFrame = CFrame.new(hrp.Position); local done = false
-        RS:BindToRenderStep("VVUMobTween", Enum.RenderPriority.Input.Value - 2, function(dt)
-            if _mobTweenVersion ~= myVersion or (cancelCheck and cancelCheck()) then RS:UnbindFromRenderStep("VVUMobTween"); done = true; return end
-            local h = getHRP(); if not h then RS:UnbindFromRenderStep("VVUMobTween"); done = true; return end
+        RS:BindToRenderStep("TempoMobTween", Enum.RenderPriority.Input.Value - 2, function(dt)
+            if _mobTweenVersion ~= myVersion or (cancelCheck and cancelCheck()) then RS:UnbindFromRenderStep("TempoMobTween"); done = true; return end
+            local h = getHRP(); if not h then RS:UnbindFromRenderStep("TempoMobTween"); done = true; return end
             local mv = target - tweenFrame.Position
-            if mv.Magnitude <= 1 then h.CFrame = cf; RS:UnbindFromRenderStep("VVUMobTween"); done = true; return end
+            if mv.Magnitude <= 1 then h.CFrame = cf; RS:UnbindFromRenderStep("TempoMobTween"); done = true; return end
             tweenFrame = tweenFrame + mv.Unit * S.tweenSpeed * dt
             h.AssemblyLinearVelocity = Vector3.zero; h.CFrame = CFrame.new(tweenFrame.Position)
         end)
@@ -282,344 +271,362 @@ do
 end
 
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 6. UI BOOTSTRAP (TempoUI / TeekUI)                                      ║
--- ╚════════════════════════════════════════════════════════════════════════╝
+-- ============================================================
+-- UI (TempoUI / TeekUI — native controls)
+-- ============================================================
 
 local TeekUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Demonskull123/bundleui/refs/heads/main/TempoUI-bundle.lua"))()
 local UI = TeekUI.new({
-    Title = "TEMPO",
+    Title    = "TEMPO",
     Subtitle = "VV Ultimatum",
-    Version = "v1",
-    Preset = "Haunted",
+    Version  = "v1",
+    Preset   = "Haunted",
 })
 
+local Opt = {}
+local Tog = {}
+
 local function notify(a, b, c)
-    local msg
-    if c ~= nil then
-        msg = tostring(a) .. ": " .. tostring(b)
-    elseif b ~= nil and type(b) ~= "number" then
-        msg = tostring(a) .. ": " .. tostring(b)
-    else
-        msg = tostring(a)
-    end
+    local msg = type(b) == "string" and (tostring(a) .. " — " .. tostring(b)) or tostring(a)
     task.defer(function()
         pcall(function()
-            if UI and UI.Notify then
-                UI:Notify(msg, "good")
-            end
+            if UI and UI.Notify then UI:Notify(msg, "good") end
         end)
     end)
 end
 
 local _unloadFns = {}
 local function onUnload(fn)
-    if type(fn) == "function" then
-        _unloadFns[#_unloadFns + 1] = fn
-    end
+    if type(fn) == "function" then _unloadFns[#_unloadFns + 1] = fn end
 end
 
-_dzEnv._VVUUnload = function()
-    for _, fn in ipairs(_unloadFns) do
-        pcall(fn)
-    end
-    pcall(function()
-        if UI and UI.Destroy then UI:Destroy() end
-    end)
+_tempo._TempoUnload = function()
+    for _, fn in ipairs(_unloadFns) do pcall(fn) end
+    pcall(function() if UI and UI.Destroy then UI:Destroy() end end)
 end
 
--- ------------------------------------------------------------
--- Adapter: DzLib-style controls on top of TempoUI tabs
--- Opt.X.Value / Tog.X.Value / :Set / :Refresh stay compatible
--- ------------------------------------------------------------
-
-local Opt = {}
-local Tog = {}
-
-local function wrapToggle(tab, opts)
-    local name = opts.Name or "Toggle"
-    local default = opts.Default == true
-    local cb = opts.Callback
-    local state = { Value = default }
-    tab:Toggle(name, default, function(v)
-        state.Value = v == true
-        if cb then pcall(cb, state.Value) end
-    end)
-    function state:Set(v)
-        self.Value = v == true
-        if cb then pcall(cb, self.Value) end
-    end
-    return state
-end
-
-local function wrapSlider(tab, opts)
-    local name = opts.Name or "Slider"
-    local minv = opts.Min or 0
-    local maxv = opts.Max or 100
-    local default = opts.Default or minv
-    local cb = opts.Callback
-    local suffix = opts.Suffix or opts.Unit or nil
-    local state = { Value = default }
-    if suffix then
-        tab:Slider(name, minv, maxv, default, function(v)
-            state.Value = v
-            if cb then pcall(cb, v) end
-        end, suffix)
-    else
-        tab:Slider(name, minv, maxv, default, function(v)
-            state.Value = v
-            if cb then pcall(cb, v) end
-        end)
-    end
-    function state:Set(v)
-        self.Value = v
-        if cb then pcall(cb, v) end
-    end
-    return state
-end
-
-local function wrapDropdown(tab, opts)
-    local name = opts.Name or "Dropdown"
-    local items = opts.Items or {}
-    local default = opts.Default
-    local multi = opts.Multi == true
-    local cb = opts.Callback
-    local state = { Value = default, Items = items }
-
-    -- TempoUI Dropdown / Cycle depending on availability
-    local ok = false
-    if type(tab.Dropdown) == "function" then
-        ok = pcall(function()
-            local ctrl = tab:Dropdown(name, items, default, function(v)
-                state.Value = v
-                if cb then pcall(cb, v) end
-            end)
-            state._ctrl = ctrl
-        end)
-    end
-    if not ok and type(tab.Cycle) == "function" then
-        local list = {}
-        for i, v in ipairs(items) do list[i] = tostring(v) end
-        if #list == 0 then list = { "None" } end
-        local def = default
-        if type(def) == "table" then def = list[1] end
-        def = tostring(def or list[1])
-        tab:Cycle(name, list, def, function(v)
-            state.Value = v
-            if cb then pcall(cb, v) end
-        end)
-    elseif not ok then
-        -- fallback label + button cycle
-        tab:Label(name .. ": " .. tostring(default))
-    end
-
-    function state:Set(v)
-        self.Value = v
-        if cb then pcall(cb, v) end
-    end
-    function state:Refresh(newItems)
-        self.Items = newItems or {}
-        -- TempoUI may not support live refresh; store only
-    end
-    return state
-end
-
-local function wrapButton(tab, opts)
-    local name = opts.Name or "Button"
-    local primary = opts.Primary == true or opts.Danger == true
-    local cb = opts.Callback
-    tab:Button(name, primary, function()
-        if cb then pcall(cb) end
-    end)
-end
-
-local function wrapTextbox(tab, opts)
-    local name = opts.Name or "Input"
-    local placeholder = opts.Placeholder or name
-    local cb = opts.Callback
-    local state = { Value = "" }
-    if type(tab.Input) == "function" then
-        tab:Input(placeholder, 120, function(txt)
-            state.Value = tostring(txt or "")
-            if cb then pcall(cb, state.Value) end
-        end)
-    else
-        tab:Label(name)
-    end
-    function state:Set(v)
-        self.Value = tostring(v or "")
-        if cb then pcall(cb, self.Value) end
-    end
-    return state
-end
-
-local function wrapLabel(tab, text)
-    tab:Label(tostring(text or ""))
-end
-
-local function wrapColor(tab, opts)
-    local name = opts.Name or "Color"
-    local default = opts.Default or Color3.fromRGB(255, 255, 255)
-    local cb = opts.Callback
-    local state = { Value = default }
-    if type(tab.Color) == "function" then
-        pcall(function()
-            tab:Color(name, default, function(c)
-                state.Value = c
-                if cb then pcall(cb, c) end
-            end)
-        end)
-    else
-        tab:Label(name)
-        if cb then pcall(cb, default) end
-    end
-    function state:Set(v)
-        self.Value = v
-        if cb then pcall(cb, v) end
-    end
-    return state
-end
-
-local function makeSection(tab)
-    return {
-        AddToggle = function(_, o) return wrapToggle(tab, o) end,
-        AddSlider = function(_, o) return wrapSlider(tab, o) end,
-        AddDropdown = function(_, o) return wrapDropdown(tab, o) end,
-        AddButton = function(_, o) wrapButton(tab, o) end,
-        AddTextbox = function(_, o) return wrapTextbox(tab, o) end,
-        AddLabel = function(_, t) wrapLabel(tab, t) end,
-        AddColorpicker = function(_, o) return wrapColor(tab, o) end,
-        -- aliases some scripts use
-        AddColor = function(_, o) return wrapColor(tab, o) end,
-        AddKeybind = function(_, o)
-            -- minimal stub: label only
-            tab:Label((o and o.Name or "Keybind") .. " (bind in executor)")
-            return { Value = o and o.Default or nil, Set = function() end }
-        end,
-    }
-end
-
--- Tabs (flat — TempoUI has no subtabs; sections carry the old subtab names)
-local TabMain    = UI:Tab("Main", "box")
-local TabChar    = UI:Tab("Character", "move")
-local TabParry   = UI:Tab("Auto Parry", "shield")
-local TabVis     = UI:Tab("Visuals", "eye")
-local TabWorld   = UI:Tab("World", "sliders")
-local TabNav     = UI:Tab("Navigation", "move")
-local TabMisc    = UI:Tab("Misc", "spark")
-local TabServer  = UI:Tab("Server", "info")
-local TabIface   = UI:Tab("Interface", "sliders")
-
--- Map every old Sec.* to a section on the appropriate tab
-local Sec = {}
-local function sec(tab, title)
-    tab:Section(title)
-    return makeSection(tab)
-end
-
-Sec.PlayerFarm       = sec(TabMain, "Player Farm")
-Sec.MobFarm          = sec(TabMain, "Mob Farm")
-Sec.FarmConfig       = sec(TabMain, "Farm Config")
-Sec.AutoSkill        = sec(TabMain, "Auto Skill")
-Sec.AutoSell         = sec(TabMain, "Auto Sell")
-Sec.AutoStore        = sec(TabMain, "Auto Store")
-Sec.QuestHelper      = sec(TabMain, "Quest Helper")
-Sec.AutoRaid         = sec(TabMain, "Auto Raid")
-Sec.Gauntlet         = sec(TabMain, "Gauntlet")
-Sec.ItemNotifier     = sec(TabMain, "Item Notifier")
-
-Sec.Movement         = sec(TabChar, "Movement")
-Sec.Morphs           = sec(TabChar, "Morphs")
-Sec.Utility          = sec(TabChar, "Utility")
-Sec.Enhancements     = sec(TabChar, "Enhancements")
-Sec.Aimbot           = sec(TabChar, "Aimbot")
-
-Sec.AutoParry        = sec(TabParry, "Auto Parry")
-Sec.FaceLock         = sec(TabParry, "Face Lock")
-Sec.TimingBuilder    = sec(TabParry, "Timing Builder")
-Sec.CommunityTimings = sec(TabParry, "Community Timings")
-Sec.AnimLogger       = sec(TabParry, "Anim Logger")
-Sec.Whitelist        = sec(TabParry, "Whitelist")
-
-Sec.PlayerESP        = sec(TabVis, "Player ESP")
-Sec.MobESP           = sec(TabVis, "Mob ESP")
-Sec.NPCESP           = sec(TabVis, "NPC ESP")
-Sec.QuestESP         = sec(TabVis, "Quest ESP")
-Sec.ChestESP         = sec(TabVis, "Chest ESP")
-Sec.PortalESP        = sec(TabVis, "Portal ESP")
-Sec.MarkerESP        = sec(TabVis, "Marker ESP")
-Sec.ESPConfig        = sec(TabVis, "ESP Config")
-
-Sec.Camera           = sec(TabWorld, "Camera")
-Sec.VisualFX         = sec(TabWorld, "Visual FX")
-Sec.FPSBoost         = sec(TabWorld, "FPS Boost")
-Sec.Tools            = sec(TabWorld, "Tools")
-
-Sec.Teleport         = sec(TabNav, "Teleport")
-Sec.GameTeleports    = sec(TabNav, "Game Teleports")
-Sec.ChestFarm        = sec(TabNav, "Chest Farm")
-Sec.Attach           = sec(TabNav, "Attach")
-Sec.AttachConfig     = sec(TabNav, "Attach Config")
-
-Sec.Ownership        = sec(TabMisc, "Ownership")
-Sec.HogSniper        = sec(TabMisc, "Hogyoku Sniper")
-Sec.AutoTutorial     = sec(TabMisc, "Auto Tutorial")
-Sec.AutoHop          = sec(TabMisc, "Auto Hop")
-Sec.Abilities        = sec(TabMisc, "Abilities")
-Sec.AntiStatus       = sec(TabMisc, "Anti Status")
-
-Sec.SrvServer        = sec(TabServer, "Server")
-Sec.SrvMisc          = sec(TabServer, "Misc")
-Sec.SrvJobId         = sec(TabServer, "Job ID Manager")
-Sec.SrvSaved         = sec(TabServer, "Saved Servers")
-Sec.SrvPlaceTp       = sec(TabServer, "Place Teleport")
-
--- Interface tab (Tempo built-in look controls)
-pcall(function()
-    UI:mountInterface(TabIface, {})
-end)
-
--- helper stubs used by feature code that expected DzLib dropdown helpers
 local function ddRefresh(dd, items)
-    if dd and type(dd.Refresh) == "function" then
-        pcall(function() dd:Refresh(items) end)
-    elseif dd then
+    if type(dd) == "table" then
         dd.Items = items
+        if type(dd.Refresh) == "function" then pcall(dd.Refresh, dd, items) end
     end
 end
 local function ddSet(dd, value)
-    if dd and type(dd.Set) == "function" then
-        pcall(function() dd:Set(value) end)
-    elseif dd then
+    if type(dd) == "table" then
         dd.Value = value
+        if type(dd.Set) == "function" then pcall(dd.Set, dd, value) end
     end
 end
-
-local function attachKeybind(toggleObj, keyCode)
-    return nil
-end
-
-local function attachColor(toggleObj, default, callback)
+local function attachKeybind() return nil end
+local function attachColor(_, default, callback)
     if callback then pcall(callback, default) end
-    return nil
+end
+local function normalizeSelection(values)
+    local out = {}
+    if type(values) ~= "table" then return out end
+    for k, v in pairs(values) do
+        if type(v) == "boolean" then
+            if v then out[k] = true end
+        elseif type(v) == "string" then
+            out[v] = true
+        end
+    end
+    return out
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 7. FEATURE BODY (ported from VV Ultimatum)                             ║
--- ╚════════════════════════════════════════════════════════════════════════╝
+-- ============================================================
+-- TABS
+-- ============================================================
+-- Tab names match DZ Hub (main + subtab surface)
+local TabFarm       = UI:Tab("Farm")
+local TabInventory  = UI:Tab("Sell & Store")
+local TabQuests     = UI:Tab("Quests & Raids")
+local TabMovement   = UI:Tab("Movement")
+local TabUtility    = UI:Tab("Utility")
+local TabAimbot     = UI:Tab("Aimbot")
+local TabParry      = UI:Tab("Auto Parry")
+local TabTimings    = UI:Tab("Timings")
+local TabLogger     = UI:Tab("Logger")
+local TabESP        = UI:Tab("ESP")
+local TabWorldESP   = UI:Tab("World ESP")
+local TabCamera     = UI:Tab("Camera")
+local TabPerf       = UI:Tab("Performance")
+local TabTeleport   = UI:Tab("Teleport")
+local TabAttach     = UI:Tab("Attach")
+local TabMisc       = UI:Tab("Misc")
+local TabAbilities  = UI:Tab("Abilities")
+local TabServer     = UI:Tab("Server")
+local TabJobId      = UI:Tab("Job ID")
+local TabPlaces     = UI:Tab("Places")
+local TabIface      = UI:Tab("Interface")
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 8. STATE                                                               ║
--- ╚════════════════════════════════════════════════════════════════════════╝
+-- ============================================================
+-- Section bridge — feature code calls Sec.X:AddToggle etc.
+-- Each call maps to native TempoUI :Toggle :Slider :Button
+-- :Dropdown :Input :Label so every control actually renders.
+-- ============================================================
 
--- notify provided by TempoUI bootstrap
+local function makeSec(tab, title)
+    local opened = false
+    local function open()
+        if not opened then
+            opened = true
+            tab:Section(title)
+        end
+    end
+
+    local sec = {}
+
+    function sec:AddToggle(opts)
+        open()
+        opts = opts or {}
+        local name = opts.Name or "Toggle"
+        local default = opts.Default == true
+        local cb = opts.Callback
+        local state = { Value = default }
+        tab:Toggle(name, default, function(v)
+            state.Value = v == true
+            if cb then pcall(cb, state.Value) end
+        end)
+        function state:Set(v)
+            self.Value = v == true
+            if cb then pcall(cb, self.Value) end
+        end
+        function state:Keybind() end
+        function state:Colorpicker() end
+        return state
+    end
+
+    function sec:AddSlider(opts)
+        open()
+        opts = opts or {}
+        local name = opts.Name or "Slider"
+        local minv = opts.Min or 0
+        local maxv = opts.Max or 100
+        local def = opts.Default
+        if def == nil then def = minv end
+        local cb = opts.Callback
+        local suffix = opts.Suffix
+        local state = { Value = def }
+        if suffix then
+            tab:Slider(name, minv, maxv, def, function(v)
+                state.Value = v
+                if cb then pcall(cb, v) end
+            end, suffix)
+        else
+            tab:Slider(name, minv, maxv, def, function(v)
+                state.Value = v
+                if cb then pcall(cb, v) end
+            end)
+        end
+        function state:Set(v)
+            self.Value = v
+            if cb then pcall(cb, v) end
+        end
+        return state
+    end
+
+    function sec:AddDropdown(opts)
+        open()
+        opts = opts or {}
+        local name = opts.Name or "Dropdown"
+        local items = opts.Items or {}
+        local default = opts.Default
+        local cb = opts.Callback
+        local state = { Value = default, Items = items }
+
+        local list = {}
+        if type(items) == "table" then
+            for _, x in ipairs(items) do list[#list + 1] = tostring(x) end
+            if #list == 0 then
+                for k, v in pairs(items) do
+                    if type(v) == "boolean" and v then list[#list + 1] = tostring(k)
+                    elseif type(k) == "number" then list[#list + 1] = tostring(v)
+                    end
+                end
+            end
+        end
+        if #list == 0 then list = { "None" } end
+
+        local defStr
+        if type(default) == "string" then
+            defStr = default
+        elseif type(default) == "table" then
+            defStr = tostring(next(default) or list[1])
+        else
+            defStr = tostring(default or list[1])
+        end
+
+        if type(tab.Dropdown) == "function" then
+            pcall(function()
+                tab:Dropdown(name, list, defStr, function(v)
+                    state.Value = v
+                    if cb then pcall(cb, v) end
+                end)
+            end)
+        elseif type(tab.Cycle) == "function" then
+            pcall(function()
+                tab:Cycle(name, list, defStr, function(v)
+                    state.Value = v
+                    if cb then pcall(cb, v) end
+                end)
+            end)
+        else
+            tab:Label(name .. ": " .. defStr)
+        end
+
+        function state:Set(v)
+            self.Value = v
+            if cb then pcall(cb, v) end
+        end
+        function state:Refresh(newItems)
+            self.Items = newItems or {}
+        end
+        return state
+    end
+
+    function sec:AddButton(opts)
+        open()
+        opts = opts or {}
+        local name = opts.Name or "Button"
+        local primary = opts.Primary == true
+        local cb = opts.Callback
+        tab:Button(name, primary, function()
+            if cb then pcall(cb) end
+        end)
+    end
+
+    function sec:AddTextbox(opts)
+        open()
+        opts = opts or {}
+        local name = opts.Name or "Input"
+        local ph = opts.Placeholder or name
+        local cb = opts.Callback
+        local state = { Value = "" }
+        if type(tab.Input) == "function" then
+            tab:Input(ph, "", function(txt)
+                state.Value = tostring(txt or "")
+                if cb then pcall(cb, state.Value) end
+            end)
+        else
+            tab:Label(name)
+        end
+        function state:Set(v)
+            self.Value = tostring(v or "")
+            if cb then pcall(cb, self.Value) end
+        end
+        return state
+    end
+
+    function sec:AddLabel(text)
+        open()
+        if type(text) == "table" then text = text.Name or text.Text or "" end
+        tab:Label(tostring(text or ""))
+    end
+
+    function sec:AddColorpicker(opts)
+        open()
+        opts = opts or {}
+        local name = opts.Name or "Color"
+        local default = opts.Default or Color3.fromRGB(255, 255, 255)
+        local cb = opts.Callback
+        local state = { Value = default }
+        if type(tab.Color) == "function" then
+            pcall(function()
+                tab:Color(name, default, function(c)
+                    state.Value = c
+                    if cb then pcall(cb, c) end
+                end)
+            end)
+        else
+            tab:Label(name)
+            if cb then pcall(cb, default) end
+        end
+        function state:Set(v)
+            self.Value = v
+            if cb then pcall(cb, v) end
+        end
+        return state
+    end
+
+    function sec:AddKeybind(opts)
+        open()
+        opts = opts or {}
+        tab:Label((opts.Name or "Keybind") .. " (set in executor)")
+        return { Value = opts.Default, Set = function() end }
+    end
+
+    return sec
+end
+
+local Sec = {
+    PlayerFarm       = makeSec(TabFarm,      "Player Farm"),
+    MobFarm          = makeSec(TabFarm,      "Mob Farm"),
+    FarmConfig       = makeSec(TabFarm,      "Farm Config"),
+    AutoSkill        = makeSec(TabFarm,      "Auto Skill"),
+    AutoSell         = makeSec(TabInventory, "Auto Sell"),
+    AutoStore        = makeSec(TabInventory, "Auto Store"),
+    QuestHelper      = makeSec(TabQuests,    "Quest Helper"),
+    AutoRaid         = makeSec(TabQuests,    "Auto Raid"),
+    Gauntlet         = makeSec(TabQuests,    "Gauntlet"),
+    ItemNotifier     = makeSec(TabQuests,    "Item Notifier"),
+
+    Movement         = makeSec(TabMovement,  "Movement"),
+    Morphs           = makeSec(TabMovement,  "Morphs"),
+    Utility          = makeSec(TabUtility,   "Utility"),
+    Enhancements     = makeSec(TabUtility,   "Enhancements"),
+    Aimbot           = makeSec(TabAimbot,    "Aimbot"),
+
+    AutoParry        = makeSec(TabParry,     "Auto Parry"),
+    FaceLock         = makeSec(TabParry,     "Face Lock"),
+    TimingBuilder    = makeSec(TabTimings,   "Timing Builder"),
+    CommunityTimings = makeSec(TabTimings,   "Community Timings"),
+    AnimLogger       = makeSec(TabLogger,    "Anim Logger"),
+    Whitelist        = makeSec(TabLogger,    "Whitelist"),
+
+    PlayerESP        = makeSec(TabESP,       "Player ESP"),
+    MobESP           = makeSec(TabESP,       "Mob ESP"),
+    NPCESP           = makeSec(TabESP,       "NPC ESP"),
+    QuestESP         = makeSec(TabESP,       "Quest ESP"),
+    ChestESP         = makeSec(TabWorldESP,  "Chest ESP"),
+    PortalESP        = makeSec(TabWorldESP,  "Portal ESP"),
+    MarkerESP        = makeSec(TabWorldESP,  "Marker ESP"),
+    ESPConfig        = makeSec(TabWorldESP,  "ESP Config"),
+
+    Camera           = makeSec(TabCamera,    "Camera"),
+    VisualFX         = makeSec(TabCamera,    "Visual FX"),
+    FPSBoost         = makeSec(TabPerf,      "FPS Boost"),
+    Tools            = makeSec(TabPerf,      "Tools"),
+
+    Teleport         = makeSec(TabTeleport,  "Teleport"),
+    GameTeleports    = makeSec(TabTeleport,  "Game Teleports"),
+    ChestFarm        = makeSec(TabTeleport,  "Chest Farm"),
+    Attach           = makeSec(TabAttach,    "Attach"),
+    AttachConfig     = makeSec(TabAttach,    "Attach Config"),
+
+    Ownership        = makeSec(TabMisc,      "Ownership"),
+    HogSniper        = makeSec(TabMisc,      "Hogyoku Sniper"),
+    AutoTutorial     = makeSec(TabMisc,      "Auto Tutorial"),
+    AutoHop          = makeSec(TabMisc,      "Auto Hop"),
+    Abilities        = makeSec(TabAbilities, "Abilities"),
+    AntiStatus       = makeSec(TabAbilities, "Anti Status"),
+
+    SrvServer        = makeSec(TabServer,    "Server"),
+    SrvMisc          = makeSec(TabServer,    "Misc"),
+    SrvJobId         = makeSec(TabJobId,     "Job ID Manager"),
+    SrvSaved         = makeSec(TabJobId,     "Saved Servers"),
+    SrvPlaceTp       = makeSec(TabPlaces,    "Place Teleport"),
+}
+
+
+-- notify from TempoUI
 
 if not GuardOk then
     notify("Warning: the game's error detector was NOT silenced (" .. GuardWhy
         .. "). Script errors may be reported to the server.", 12)
 end
 
--- onUnload provided by TempoUI bootstrap
+-- onUnload from TempoUI
 
 onUnload(function()
     for _, c in ipairs(_conns) do
@@ -677,9 +684,6 @@ local Connections = {}
 
 local espColor = Color3.fromRGB(255, 255, 255)
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 9. FARM CORE                                                           ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 local farmState = { plrs = false, plrTarget = "", mobs = false, mobTargets = {}, croc = false }
 local _farmMode = "Behind"
@@ -700,16 +704,16 @@ local function _calcFarmPos(rp)
 end
 
 local farmConns = {}
-_dzEnv._VVU_autoM1 = false; _dzEnv._VVU_autoCrit = false; _dzEnv._VVU_autoEquip = false
-_dzEnv._VVU_autoRes = false; _dzEnv._VVU_autoGrip = false
+_tempo._Tempo_autoM1 = false; _tempo._Tempo_autoCrit = false; _tempo._Tempo_autoEquip = false
+_tempo._Tempo_autoRes = false; _tempo._Tempo_autoGrip = false
 
 local function enableFarmCombat()
-    _dzEnv._VVU_autoEquip = true; _dzEnv._VVU_autoM1 = true
-    _dzEnv._VVU_autoCrit = true;  _dzEnv._VVU_autoGrip = true
+    _tempo._Tempo_autoEquip = true; _tempo._Tempo_autoM1 = true
+    _tempo._Tempo_autoCrit = true;  _tempo._Tempo_autoGrip = true
 end
 local function disableFarmCombat()
-    _dzEnv._VVU_autoEquip = false; _dzEnv._VVU_autoM1 = false
-    _dzEnv._VVU_autoCrit = false;  _dzEnv._VVU_autoGrip = false
+    _tempo._Tempo_autoEquip = false; _tempo._Tempo_autoM1 = false
+    _tempo._Tempo_autoCrit = false;  _tempo._Tempo_autoGrip = false
 end
 
 bind(LP.CharacterAdded, function()
@@ -719,25 +723,25 @@ bind(LP.CharacterAdded, function()
     end
 end)
 
-if not _dzEnv._VVU_combatLoopsStarted then
-    _dzEnv._VVU_combatLoopsStarted = true
+if not _tempo._Tempo_combatLoopsStarted then
+    _tempo._Tempo_combatLoopsStarted = true
     local Requests = ReplicatedStorage:WaitForChild("Requests")
     task.spawn(function()
         while true do
             task.wait(0.15)
-            if _dzEnv._VVU_autoM1 then pcall(function() fire(Requests.Combat, "LightAttack", true, false) end) end
+            if _tempo._Tempo_autoM1 then pcall(function() fire(Requests.Combat, "LightAttack", true, false) end) end
         end
     end)
     task.spawn(function()
         while true do
             task.wait(0.15)
-            if _dzEnv._VVU_autoCrit then pcall(function() fire(Requests.Combat, "HeavyAttack", true) end) end
+            if _tempo._Tempo_autoCrit then pcall(function() fire(Requests.Combat, "HeavyAttack", true) end) end
         end
     end)
     task.spawn(function()
         while true do
             task.wait(0.5)
-            if _dzEnv._VVU_autoGrip then pcall(function()
+            if _tempo._Tempo_autoGrip then pcall(function()
                 local ents = workspace:FindFirstChild("Living"); if not ents then return end
                 for _, mob in ipairs(ents:GetChildren()) do
                     if PS:GetPlayerFromCharacter(mob) or mob == LP.Character then continue end
@@ -750,7 +754,7 @@ if not _dzEnv._VVU_combatLoopsStarted then
     task.spawn(function()
         while true do
             task.wait(0.5)
-            if _dzEnv._VVU_autoRes then pcall(function()
+            if _tempo._Tempo_autoRes then pcall(function()
                 local living = workspace:FindFirstChild("Living")
                 local myModel = living and living:FindFirstChild(LP.Name)
                 local status = myModel and myModel:FindFirstChild("Status")
@@ -762,7 +766,7 @@ if not _dzEnv._VVU_combatLoopsStarted then
     task.spawn(function()
         while true do
             task.wait(0.5)
-            if _dzEnv._VVU_autoEquip then pcall(function()
+            if _tempo._Tempo_autoEquip then pcall(function()
                 local living = workspace:FindFirstChild("Living")
                 local myModel = living and living:FindFirstChild(LP.Name)
                 local status = myModel and myModel:FindFirstChild("Status")
@@ -889,9 +893,6 @@ local function scanMobList()
     return list
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 10. MAIN TAB                                                           ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 do
     local function buildPlrList()
@@ -1725,15 +1726,15 @@ do
     })
 
     Sec.FarmConfig:AddLabel("Combat")
-    Tog.AutoEquip = Sec.FarmConfig:AddToggle({ Name = "Auto Equip Weapon",      Default = false, Callback = function(p) _dzEnv._VVU_autoEquip = p end })
-    Tog.AutoGrip  = Sec.FarmConfig:AddToggle({ Name = "Auto Grip",              Default = false, Callback = function(p) _dzEnv._VVU_autoGrip = p end })
-    Tog.AutoRes   = Sec.FarmConfig:AddToggle({ Name = "Res/Shikai/Volt Weapon", Default = false, Callback = function(p) _dzEnv._VVU_autoRes = p end })
-    Tog.AutoM1    = Sec.FarmConfig:AddToggle({ Name = "Kill Aura",              Default = false, Callback = function(p) _dzEnv._VVU_autoM1 = p end })
-    Tog.AutoCrit  = Sec.FarmConfig:AddToggle({ Name = "Auto Critical Aura",     Default = false, Callback = function(p) _dzEnv._VVU_autoCrit = p end })
+    Tog.AutoEquip = Sec.FarmConfig:AddToggle({ Name = "Auto Equip Weapon",      Default = false, Callback = function(p) _tempo._Tempo_autoEquip = p end })
+    Tog.AutoGrip  = Sec.FarmConfig:AddToggle({ Name = "Auto Grip",              Default = false, Callback = function(p) _tempo._Tempo_autoGrip = p end })
+    Tog.AutoRes   = Sec.FarmConfig:AddToggle({ Name = "Res/Shikai/Volt Weapon", Default = false, Callback = function(p) _tempo._Tempo_autoRes = p end })
+    Tog.AutoM1    = Sec.FarmConfig:AddToggle({ Name = "Kill Aura",              Default = false, Callback = function(p) _tempo._Tempo_autoM1 = p end })
+    Tog.AutoCrit  = Sec.FarmConfig:AddToggle({ Name = "Auto Critical Aura",     Default = false, Callback = function(p) _tempo._Tempo_autoCrit = p end })
 
     onUnload(function()
-        _dzEnv._VVU_autoM1 = false; _dzEnv._VVU_autoCrit = false; _dzEnv._VVU_autoEquip = false
-        _dzEnv._VVU_autoGrip = false; _dzEnv._VVU_autoRes = false
+        _tempo._Tempo_autoM1 = false; _tempo._Tempo_autoCrit = false; _tempo._Tempo_autoEquip = false
+        _tempo._Tempo_autoGrip = false; _tempo._Tempo_autoRes = false
         for _, conn in pairs(farmConns) do if conn then conn:Disconnect() end end
     end)
 end
@@ -2144,7 +2145,7 @@ do
                     title = "Item Drop — " .. LP.Name,
                     description = desc,
                     color = hasLeg and 16766720 or 5793266,
-                    footer = { text = "VV Ultimatum • DZ Hub" },
+                    footer = { text = "TEMPO" },
                 } },
             })
         end)
@@ -2541,9 +2542,6 @@ do
     end)
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 11. CHARACTER TAB                                                      ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 local ijConn, noclipConn, _autoTPConn, afkConn
 local _afkLoop, _autoRespLoop, noAnimsThread
@@ -2557,8 +2555,8 @@ do
                 RS:BindToRenderStep("VVUFly", Enum.RenderPriority.Input.Value, function(dt)
                     local c = getChar(); if not c then return end
                     local hrp = c:FindFirstChild("HumanoidRootPart"); if not hrp then return end
-                    if not _dzEnv._VVU_flyFrame then _dzEnv._VVU_flyFrame = hrp.CFrame end
-                    local frame = _dzEnv._VVU_flyFrame; local cf = Cam.CFrame; local mv = Vector3.zero
+                    if not _tempo._Tempo_flyFrame then _tempo._Tempo_flyFrame = hrp.CFrame end
+                    local frame = _tempo._Tempo_flyFrame; local cf = Cam.CFrame; local mv = Vector3.zero
                     local fmode = Opt.FlyMode and Opt.FlyMode.Value or "MoveDirection"
                     if fmode == "MoveDirection" then
                         local fwd = Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z).Unit
@@ -2580,11 +2578,11 @@ do
                     if mv.Magnitude > 0 then frame = frame + mv.Unit * S.flySpeed * dt end
                     local fwd3 = Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)
                     if fwd3.Magnitude > 0 then frame = CFrame.new(frame.Position, frame.Position + fwd3.Unit) end
-                    _dzEnv._VVU_flyFrame = frame
+                    _tempo._Tempo_flyFrame = frame
                     hrp.AssemblyLinearVelocity = Vector3.zero; hrp.CFrame = frame
                 end)
             else
-                RS:UnbindFromRenderStep("VVUFly"); _dzEnv._VVU_flyFrame = nil
+                RS:UnbindFromRenderStep("VVUFly"); _tempo._Tempo_flyFrame = nil
             end
         end,
     })
@@ -3156,7 +3154,7 @@ onUnload(function()
     RS:UnbindFromRenderStep("VVUTween")
     RS:UnbindFromRenderStep("VVUChestTween")
     RS:UnbindFromRenderStep("VVUMobTween")
-    _dzEnv._VVU_flyFrame = nil
+    _tempo._Tempo_flyFrame = nil
 
     if noclipConn then noclipConn:Disconnect(); noclipConn = nil end
     local c = getChar()
@@ -3177,19 +3175,16 @@ onUnload(function()
 
     _autoRespLoop = false
 
-    if _dzEnv._ZHCrosshair then
-        for _, d in ipairs(_dzEnv._ZHCrosshair) do pcall(function() d:Remove() end) end
-        _dzEnv._ZHCrosshair = nil
+    if _tempo._ZHCrosshair then
+        for _, d in ipairs(_tempo._ZHCrosshair) do pcall(function() d:Remove() end) end
+        _tempo._ZHCrosshair = nil
     end
 end)
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 12. AUTO PARRY TAB                                                     ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 do
-    if not _dzEnv._VVU_AP then _dzEnv._VVU_AP = {} end
-    local AP = _dzEnv._VVU_AP
+    if not _tempo._Tempo_AP then _tempo._Tempo_AP = {} end
+    local AP = _tempo._Tempo_AP
     AP.Players    = PS
     AP.RunSvc     = RS
     AP.CoreGui    = game:GetService("CoreGui")
@@ -3212,8 +3207,8 @@ do
     AP.lastParry = 0
     AP.lastDodge = 0
 
-    AP.TIMINGS_FILE = "DZHub/vvu_ap_timings.json"
-    pcall(function() if makefolder then makefolder("DZHub") end end)
+    AP.TIMINGS_FILE = "TempoHub/vvu_ap_timings.json"
+    pcall(function() if makefolder then makefolder("TempoHub") end end)
 
     AP.WHITE = Color3.fromRGB(255, 255, 255)
     AP.DIM   = Color3.fromRGB(180, 180, 180)
@@ -3379,11 +3374,11 @@ do
     AP.scrubbing = false; AP.scrubWasPaused = false
     AP.vpDragging = false; AP.vpLastX = 0; AP.vpLastY = 0
 
-    AP.sg = AP.inst("ScreenGui", { Name = "DZHubAutoParry", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Global, IgnoreGuiInset = true })
+    AP.sg = AP.inst("ScreenGui", { Name = "TempoHubAutoParry", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Global, IgnoreGuiInset = true })
     pcall(function() AP.sg.Parent = AP.CoreGui end)
     if not AP.sg.Parent then AP.sg.Parent = LP.PlayerGui end
 
-    AP.visWin, AP.visX = AP.makeWin(AP.sg, UDim2.new(0, 8, 0.5, -384), UDim2.new(0, 548, 0, 768), "DZ Hub  ·  Visualizer")
+    AP.visWin, AP.visX = AP.makeWin(AP.sg, UDim2.new(0, 8, 0.5, -384), UDim2.new(0, 548, 0, 768), "TEMPO  ·  Visualizer")
     AP.visX.MouseButton1Click:Connect(function()
         AP.visWin.Visible = false
         if Tog.APShowViz then Tog.APShowViz:Set(false) end
@@ -3818,7 +3813,7 @@ do
         notify("Exported All!", 2)
     end)
 
-    AP.logWin, AP.logX = AP.makeWin(AP.sg, UDim2.new(1, -700, 0, 50), UDim2.new(0, 680, 0, 740), "DZ Hub  ·  Logger")
+    AP.logWin, AP.logX = AP.makeWin(AP.sg, UDim2.new(1, -700, 0, 50), UDim2.new(0, 680, 0, 740), "TEMPO  ·  Logger")
     AP.logX.MouseButton1Click:Connect(function()
         AP.logWin.Visible = false
         if Tog.APEnableLogger then Tog.APEnableLogger:Set(false) end
@@ -4555,9 +4550,6 @@ do
     end
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 13. VISUALS TAB                                                        ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 do
     local espEnabled = false
@@ -5224,9 +5216,6 @@ do
     end
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 14. WORLD TAB                                                          ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 do
     local specTarget = nil; local specConn = nil
@@ -5433,7 +5422,7 @@ do
         Name = "Crosshair", Default = false,
         Callback = function(p)
             if p then
-                if not _dzEnv._ZHCrosshair then
+                if not _tempo._ZHCrosshair then
                     local d = Drawing.new("Square"); d.Size = Vector2.new(14, 14)
                     d.Position = Vector2.new(Cam.ViewportSize.X / 2 - 7, Cam.ViewportSize.Y / 2 - 7)
                     d.Color = Color3.new(1, 1, 1); d.Transparency = 1; d.Filled = false; d.Thickness = 1; d.Visible = true
@@ -5445,12 +5434,12 @@ do
                     d3.From = Vector2.new(Cam.ViewportSize.X / 2, Cam.ViewportSize.Y / 2 - 6)
                     d3.To = Vector2.new(Cam.ViewportSize.X / 2, Cam.ViewportSize.Y / 2 + 6)
                     d3.Color = Color3.new(1, 1, 1); d3.Thickness = 1; d3.Visible = true
-                    _dzEnv._ZHCrosshair = { d, d2, d3 }
+                    _tempo._ZHCrosshair = { d, d2, d3 }
                 end
             else
-                if _dzEnv._ZHCrosshair then
-                    for _, d in ipairs(_dzEnv._ZHCrosshair) do pcall(function() d:Remove() end) end
-                    _dzEnv._ZHCrosshair = nil
+                if _tempo._ZHCrosshair then
+                    for _, d in ipairs(_tempo._ZHCrosshair) do pcall(function() d:Remove() end) end
+                    _tempo._ZHCrosshair = nil
                 end
             end
         end,
@@ -5591,9 +5580,6 @@ do
     end
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 15. NAVIGATION TAB                                                     ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 do
     Opt.Coordinates = Sec.Teleport:AddTextbox({ Name = "Coordinates", Placeholder = "X, Y, Z", Callback = function() end })
@@ -6054,9 +6040,6 @@ do
     end
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 16. MISC TAB                                                           ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 do
     local _ownHighlights = {}; local _ownVizConn = nil
@@ -6209,14 +6192,14 @@ do
                     local Requests = RS2:WaitForChild("Requests")
                     local WS       = cref(workspace)
 
-                    if _dzEnv.FA_Tutorial then
-                        pcall(function() _dzEnv.FA_Tutorial._stop() end)
+                    if _tempo.FA_Tutorial then
+                        pcall(function() _tempo.FA_Tutorial._stop() end)
                     end
 
                     local _active = true
                     local function stopped() return not _active end
 
-                    _dzEnv.FA_Tutorial = {
+                    _tempo.FA_Tutorial = {
                         _stop = function()
                             _active = false
                         end,
@@ -6592,12 +6575,12 @@ do
                 end)
                 notify("Tutorial skip started", 3)
             else
-                pcall(function() if _dzEnv.FA_Tutorial then _dzEnv.FA_Tutorial._stop() end end)
+                pcall(function() if _tempo.FA_Tutorial then _tempo.FA_Tutorial._stop() end end)
                 notify("Tutorial skip stopped", 3)
             end
         end,
     })
-    onUnload(function() pcall(function() if _dzEnv.FA_Tutorial then _dzEnv.FA_Tutorial._stop() end end) end)
+    onUnload(function() pcall(function() if _tempo.FA_Tutorial then _tempo.FA_Tutorial._stop() end end) end)
 end
 
 do
@@ -6823,9 +6806,6 @@ do
     end)
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 17. SERVER TAB                                                         ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 do
     Sec.SrvServer:AddButton({
         Name = "Rejoin Server",
@@ -6912,7 +6892,7 @@ do
         end,
     })
 
-    local SAVED_PATH = "DzHub/vvu_saved_servers.json"
+    local SAVED_PATH = "TempoHub/vvu_saved_servers.json"
     local saved, savedNames, savedSel = {}, {}, nil
     local savedDrop
 
@@ -6933,7 +6913,7 @@ do
 
     local function savedPersist()
         if not writefile then return end
-        if makefolder and isfolder and not isfolder("DzHub") then pcall(makefolder, "DzHub") end
+        if makefolder and isfolder and not isfolder("TempoHub") then pcall(makefolder, "TempoHub") end
         pcall(function() writefile(SAVED_PATH, HS:JSONEncode(saved)) end)
     end
 
@@ -7045,17 +7025,22 @@ do
     task.spawn(placesFetch)
 end
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ 17. READY                                                              ║
--- ╚════════════════════════════════════════════════════════════════════════╝
 
 
 
--- ╔════════════════════════════════════════════════════════════════════════╗
--- ║ READY                                                                  ║
--- ╚════════════════════════════════════════════════════════════════════════╝
+-- ============================================================
+-- INTERFACE
+-- ============================================================
+UI:mountInterface(TabIface, {})
 
-UI:Boot({ "checking executor", "building interface", "porting VV", "ready" }, function()
-    UI:Notify("TEMPO — VV Ultimatum loaded", "good")
+-- ============================================================
+-- BOOT
+-- ============================================================
+UI:Boot({ "checking executor", "building interface", "loading modules", "ready" }, function()
+    pcall(function()
+        if UI.Select then UI:Select("Farm") end
+    end)
+    UI:Notify("TEMPO — VV Ultimatum ready", "good")
 end)
+
 end)
